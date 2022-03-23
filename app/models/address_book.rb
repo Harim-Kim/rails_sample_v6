@@ -1,8 +1,26 @@
 class AddressBook < ApplicationRecord
-  validates :name,  :presence => true
-  validates :name,   format: {with: /^[가-힣]+$/, message: "한글 및 띄어쓰기만 입력 가능합니다(자음 혹은 모음만 입력 불가)"}
-  validates :age,   :presence => true
-  validates :age,   comparison: {less_than: 20}
-  validates :age,   numericality: {only_integer: true}
+  before_destroy :phone_number_destroy_validation, prepend: true
 
+  validates :name,  :presence => true,
+            format: { with: /\A[가-힣]+\z/,
+                      message: "should be korean with valid" }
+  validates :age,   :presence => true,
+            numericality: { only_integer: true }
+  validate :age_cannot_be_greater_than
+  validates :phone_number, numericality: { only_integer: true }
+
+  private
+
+    def age_cannot_be_greater_than
+      if age && age > 20
+        errors.add(:age, "age greater than 20 can not be saved")
+      end
+    end
+    #
+    def phone_number_destroy_validation
+      unless phone_number.start_with? "02"
+        errors.add(:phone_number, "Only phone number starts with 02 could be destroyed")
+        throw :abort
+      end
+    end
 end

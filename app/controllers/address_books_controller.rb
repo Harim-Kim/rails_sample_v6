@@ -49,12 +49,16 @@ class AddressBooksController < ApplicationController
 
   # DELETE /address_books/1 or /address_books/1.json
   def destroy
-    @address_book.destroy
-
     respond_to do |format|
-      format.html { redirect_to address_books_url, notice: "Address book was successfully destroyed." }
-      format.json { head :no_content }
+      if @address_book.destroy
+        format.html { redirect_to address_books_url, notice: "Address book was successfully destroyed." }
+        format.json { head :no_content }
+      else
+        format.html { redirect_to address_books_url, alert: "Only phone number starts with 02 could be destroyed" }
+        format.json { render json: @address_book.errors, status: :unprocessable_entity }
+      end
     end
+ 
   end
 
   private
